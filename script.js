@@ -13,13 +13,15 @@ document.querySelector('#form').addEventListener('submit', async (e) => {
 
     // Display numero commits per repo
     let repo_commits = []
-    oggetto.forEach(async repo => {
+    await Promise.all(oggetto.map(async repo => {
         let commit_response = await fetch(`https://api.github.com/repos/${repo.full_name}/commits`)
         let commit_obj =  await commit_response.json()
         repo_commits.push(commit_obj.length)
-        myChart.data.datasets[0].data = repo_commits
-        myChart.update()
-    })
+    }))
+    console.log(repo_commits.length)
+    myChart.data.datasets[0].data = repo_commits
+    myChart.update()
+
 })
 
 // Chart
