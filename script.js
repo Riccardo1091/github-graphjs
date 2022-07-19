@@ -5,30 +5,31 @@ document.querySelector('#form').addEventListener('submit', async (e) => {
     let response = await fetch(`https://api.github.com/users/${username}/repos`)
     let oggetto = await response.json()
 
-    // recupero nome repo
-    myChart.data.labels = oggetto.map(repo => repo.name)
-    myChart.data.datasets[0].label = 'Commits'
+    // Display nome repop per colonna
+    myChart.data.labels = await oggetto.map(repo => repo.name)
 
-    // recupero commits repo
+    // Aggiornamento titolo chart
+    myChart.options.plugins.title.text = `${username} repositiories`
+
+    // Display numero commits per repo
     let repo_commits = []
     oggetto.forEach(async repo => {
         let commit_response = await fetch(`https://api.github.com/repos/${repo.full_name}/commits`)
         let commit_obj =  await commit_response.json()
         repo_commits.push(commit_obj.length)
+        myChart.data.datasets[0].data = repo_commits
+        myChart.update()
     })
-
-    myChart.data.datasets[0].data = repo_commits
-    myChart.update()
 })
 
 // Chart
 let ctx = document.getElementById('myChart').getContext('2d');
     let myChart = new Chart(ctx, {
-        type: 'bar', // bar, horizontalBAr, pie, line, doughnut, radar, polarArea
+        type: 'polarArea', // bar, horizontalBAr, pie, line, doughnut, radar, polarArea
         data: {
             labels: [],
             datasets:[{
-                label:'Repositories',
+                label:'Commits',
                 data: [],
                 backgroundColor:['rgba(255, 99, 132, 0.2)',
                                 'rgba(54, 162, 235, 0.2)',
@@ -43,15 +44,21 @@ let ctx = document.getElementById('myChart').getContext('2d');
             }]
         },
         options: {
-            title:{
-                display:true,
-                text:'',
-                fontSize:25
+            layout: {
+                autoPadding: true
             },
-            legend:{
-                position:'right',
-                lables:{
-                    fontcolor:'#000'
+            plugins: {
+                title:{
+                    display: true,
+                    text: 'Repositories',
+                    fontSize: 25
+                },
+                legend: {
+                    text: 'Legenda',
+                    position:'bottom',
+                    lables:{
+                        fontcolor:'#000'
+                    }
                 }
             }
         }
